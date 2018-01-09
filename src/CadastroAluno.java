@@ -1,4 +1,8 @@
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -45,9 +49,22 @@ public class CadastroAluno extends JFrame {
 		JTextField  campoBairro = new JTextField();
 		campoBairro.setBounds(100, 150, 170, 20);
 		
-		String [] listaCidade = {"Aquiraz", "Caucaia", "Eusébio", "fortaleza", "Maracanaú", "Maranguape"};
-		JComboBox listaDasCidades = new JComboBox(listaCidade);
+		ArrayList <String> listaCidade = new ArrayList<>();
+		listaCidade.add("Fortaleza");
+		listaCidade.add("Aquiraz");
+		listaCidade.add("Maracanaú");
+		listaCidade.add("Caucaia");
+		listaCidade.add("Maranguape");
+		listaCidade.add("Eusébio");
+		Collections.sort(listaCidade);
+		@SuppressWarnings("unchecked")
+		JComboBox listaDasCidades = new JComboBox(new Vector<String>(listaCidade));
 		listaDasCidades.setBounds(100, 110, 120, 20);
+		 
+		
+		/*String [] listaCidade = {"Aquiraz", "Caucaia", "Eusébio", "Fortaleza", "Maracanaú", "Maranguape"};
+		JComboBox listaDasCidades = new JComboBox(listaCidade);
+		listaDasCidades.setBounds(100, 110, 120, 20);*/
 		
 		JPanel painelFoto = new JPanel();
 		painelFoto.setBackground(Color.DARK_GRAY);
