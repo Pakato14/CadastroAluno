@@ -1,6 +1,10 @@
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -25,13 +30,14 @@ public class CadastroAluno extends JFrame {
 	private JLabel codigo, nome, email, cidade, bairro, curso, knew, foto;
 	private JTextField campoCodigo, campoNome, campoEmail, campoBairro;
 	private JRadioButton yes, no;
+	private ButtonGroup grupo;
 	private JComboBox listaDasCidades, listaDosCursos;
 	private JButton botaoConcluir, botaoConsulta, botaoLimpar; 
 	
 	
 	public CadastroAluno() {
 		iniciarComponentes();
-		//definirEventos();
+		definirEventos();
 	}		
 	
 	public void iniciarComponentes() {
@@ -75,7 +81,8 @@ public class CadastroAluno extends JFrame {
 		
 		campoEmail = new JTextField();
 		campoEmail.setBounds(100, 110, 170, 20);
-		ArrayList <String> listaCidade = new ArrayList<>();
+		
+		/*ArrayList <String> listaCidade = new ArrayList<>();
 		listaCidade.add("Fortaleza");
 		listaCidade.add("Aquiraz");
 		listaCidade.add("Maracanaú");
@@ -84,28 +91,30 @@ public class CadastroAluno extends JFrame {
 		listaCidade.add("Eusébio");
 		Collections.sort(listaCidade);
 		@SuppressWarnings("unchecked")
-		JComboBox listaDasCidades = new JComboBox(new Vector<String>(listaCidade));
+		listaDasCidades = new JComboBox(new Vector<String>(listaCidade));
+		listaDasCidades.setBounds(100, 140, 120, 20);
+		listaDasCidades.setSelectedItem(null);*/
+		
+		String [] listaCidade = {"Aquiraz", "Caucaia", "Eusébio", "Fortaleza", "Maracanaú", "Maranguape"};
+		listaDasCidades = new JComboBox(listaCidade);
 		listaDasCidades.setBounds(100, 140, 120, 20);
 		listaDasCidades.setSelectedItem(null);
-		
-		/*String [] listaCidade = {"Aquiraz", "Caucaia", "Eusébio", "Fortaleza", "Maracanaú", "Maranguape"};
-		JComboBox listaDasCidades = new JComboBox(listaCidade);
-		listaDasCidades.setBounds(100, 140, 120, 20);*/
 		
 		campoBairro = new JTextField();
 		campoBairro.setBounds(100, 170, 170, 20);
 		
 		String [] listaCursos = {"C#", "Java", "PHP", "Python", "Ruby"};
-		JComboBox listaDosCursos = new JComboBox(listaCursos);
-		listaDosCursos.setSelectedIndex(1);
+		listaDosCursos = new JComboBox(listaCursos);
+		//listaDosCursos.setSelectedIndex(1);
+		listaDosCursos.setSelectedItem(null);
 		listaDosCursos.setBounds(100, 200, 80, 20);	
 		
-		JRadioButton yes = new JRadioButton("Sim");
+		yes = new JRadioButton("Sim");
 		yes.setBounds(60, 250, 70, 20);
-		JRadioButton no = new JRadioButton("Não");
+		no = new JRadioButton("Não");
 		no.setBounds(150, 250, 70, 20);
 		
-		ButtonGroup grupo = new ButtonGroup();
+		grupo = new ButtonGroup();
 		grupo.add(yes);
 		grupo.add(no);					
 			
@@ -127,10 +136,10 @@ public class CadastroAluno extends JFrame {
 		botaoConcluir = new JButton("Concluir");
 		botaoConcluir.setBounds(50, 280, 100, 20);
 		
-		JButton botaoConsulta = new JButton("Consulta");
+		botaoConsulta = new JButton("Consulta");
 		botaoConsulta.setBounds(170, 280, 100, 20);
 		
-		JButton botaoLimpar = new JButton("Limpar");
+		botaoLimpar = new JButton("Limpar");
 		botaoLimpar.setBounds(290, 280, 100, 20);
 		
 		JMenuItem itemMenuArquivo = new JMenuItem("Sair");
@@ -176,6 +185,110 @@ public class CadastroAluno extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		
 	}	
+	public void definirEventos(){
+		// Evento do Botão Limpar.
+				botaoLimpar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						// Limpa todos os Campos.
+						campoCodigo.setText("");
+						campoNome.setText("");
+						campoEmail.setText("");
+						listaDasCidades.setSelectedItem(null);
+						campoBairro.setText("");
+						listaDosCursos.setSelectedItem(null);
+						grupo.clearSelection();
+					}
+		});
+				botaoConcluir.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						
+						if (campoCodigo.getText().equals("")) {
+							
+							JOptionPane.showMessageDialog(null,
+									"O Código não pode está vazio!");							
+							campoCodigo.requestFocus();
+		 
+						} else if (campoNome.getText().equals("")) {							
+							JOptionPane.showMessageDialog(null,
+									"O Nome não pode está vazio!");							
+							campoNome.requestFocus();
+		 
+						} else if (campoEmail.getText().equals("")) {							
+							JOptionPane.showMessageDialog(null, "O email não pode está vazio!");
+		 
+							campoEmail.requestFocus();
+		 
+						} else {
+						
+							try {
+								
+								PrintWriter out = new PrintWriter(campoCodigo.getText()
+										+ ".txt");	 
+							
+								out.println(campoCodigo.getText());
+								out.println(campoNome.getText());
+								out.println(campoEmail.getText());
+								out.println(listaDasCidades.getSelectedItem());
+								out.println(campoBairro.getText());
+								out.println(listaDosCursos.getSelectedItem());
+								if(yes.isSelected()) {
+									out.println(yes.getText());
+								}if(no.isSelected()) {
+								out.println(no.getText());
+								}								
+								
+								out.close();		 
+								
+								JOptionPane.showMessageDialog(null,
+										"Arquivo Gravado com Sucesso!");
+								
+								campoCodigo.setText("");
+								campoNome.setText("");
+								campoEmail.setText("");
+								listaDasCidades.setSelectedItem(null);
+								campoBairro.setText("");
+								listaDosCursos.setSelectedItem(null);
+								grupo.clearSelection();
+		 
+							} catch (IOException Erro) {
+								JOptionPane.showMessageDialog(null,
+										"Erro ao Gravar no Arquivo" + Erro);
+							}
+						}
+					}
+				});
+				botaoConsulta.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						
+						try {
+							
+							String arquivo = JOptionPane.showInputDialog(null,
+									"Infome o Código a abrir:");
+		 
+							BufferedReader br = new BufferedReader(new FileReader(
+									arquivo + ".txt"));
+		 
+							
+							campoCodigo.setText(br.readLine());
+							campoNome.setText(br.readLine());
+							campoEmail.setText(br.readLine());
+							listaDasCidades.setSelectedItem(br.readLine());
+							campoBairro.setText(br.readLine());
+							listaDosCursos.setSelectedItem(br.readLine());
+							String texto = br.readLine(); 
+							System.out.println(texto);
+							if(texto == yes.getText()){
+								yes.isSelected();
+							}else if(texto == no.getText()) {
+								no.isSelected();
+							}
+		 
+						} catch (IOException Erro) {
+		 
+						}
+					}
+				});
+	}
 
 	public static void main(String[] args) {
 		CadastroAluno cadastro = new CadastroAluno();
