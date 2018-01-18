@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -220,40 +221,46 @@ public class CadastroAluno extends JFrame {
 		 
 						} else {
 						
-							try {
-								
-								PrintWriter out = new PrintWriter(campoCodigo.getText()
-										+ ".txt");	 
-							
-								out.println(campoCodigo.getText());
-								out.println(campoNome.getText());
-								out.println(campoEmail.getText());
-								out.println(listaDasCidades.getSelectedItem());
-								out.println(campoBairro.getText());
-								out.println(listaDosCursos.getSelectedItem());
-								if(yes.isSelected()) {
-									out.println(yes.getText());
-								}if(no.isSelected()) {
-								out.println(no.getText());
-								}								
-								
-								out.close();		 
-								
-								JOptionPane.showMessageDialog(null,
-										"Arquivo Gravado com Sucesso!");
-								
-								campoCodigo.setText("");
-								campoNome.setText("");
-								campoEmail.setText("");
-								listaDasCidades.setSelectedItem(null);
-								campoBairro.setText("");
-								listaDosCursos.setSelectedItem(null);
-								grupo.clearSelection();
-		 
-							} catch (IOException Erro) {
-								JOptionPane.showMessageDialog(null,
-										"Erro ao Gravar no Arquivo" + Erro);
-							}
+							try {									 
+								File arquivo = new File(campoCodigo.getText()
+										+ ".txt");
+								if(arquivo.exists()){
+									JOptionPane.showMessageDialog(null, "Arquivo já exisente!",
+											"Alerta", JOptionPane.ERROR_MESSAGE);
+									campoCodigo.requestFocus();
+								}else{
+									PrintWriter out = new PrintWriter(campoCodigo.getText()
+											+ ".txt");
+									out.println(campoCodigo.getText());
+									out.println(campoNome.getText());
+									out.println(campoEmail.getText());
+									out.println(listaDasCidades.getSelectedItem());
+									out.println(campoBairro.getText());
+									out.println(listaDosCursos.getSelectedItem());
+									if(yes.isSelected()) {
+										out.println(yes.getText());
+									}if(no.isSelected()) {
+									out.println(no.getText());
+									}								
+									
+									out.close();		 
+									
+									JOptionPane.showMessageDialog(null,
+											"Arquivo Gravado com Sucesso!");
+									
+									campoCodigo.setText("");
+									campoNome.setText("");
+									campoEmail.setText("");
+									listaDasCidades.setSelectedItem(null);
+									campoBairro.setText("");
+									listaDosCursos.setSelectedItem(null);
+									grupo.clearSelection();
+								}
+			 
+								} catch (IOException Erro) {
+									JOptionPane.showMessageDialog(null,
+											"Erro ao Gravar no Arquivo" + Erro);
+								}									
 						}
 					}
 				});
@@ -266,8 +273,7 @@ public class CadastroAluno extends JFrame {
 									"Infome o Código a abrir:");
 		 
 							BufferedReader br = new BufferedReader(new FileReader(
-									arquivo + ".txt"));
-		 
+									arquivo + ".txt"));		 
 							
 							campoCodigo.setText(br.readLine());
 							campoNome.setText(br.readLine());
@@ -275,12 +281,11 @@ public class CadastroAluno extends JFrame {
 							listaDasCidades.setSelectedItem(br.readLine());
 							campoBairro.setText(br.readLine());
 							listaDosCursos.setSelectedItem(br.readLine());
-							String texto = br.readLine(); 
-							System.out.println(texto);
-							if(texto == yes.getText()){
-								yes.isSelected();
-							}else if(texto == no.getText()) {
-								no.isSelected();
+							String texto = br.readLine(); 							
+							if(texto.equals(yes.getText())){
+								yes.setSelected(true);
+							}else if(texto.equals(no.getText())) {
+								no.setSelected(true);
 							}
 		 
 						} catch (IOException Erro) {
