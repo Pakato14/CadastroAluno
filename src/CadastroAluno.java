@@ -6,6 +6,10 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +30,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import br.com.utd.conexao.ConnectionFactory;
+
 public class CadastroAluno extends JFrame {
 	
 	private JLabel codigo, nome, email, cidade, bairro, curso, knew, foto;
@@ -33,7 +39,8 @@ public class CadastroAluno extends JFrame {
 	private JRadioButton yes, no;
 	private ButtonGroup grupo;
 	private JComboBox listaDasCidades, listaDosCursos;
-	private JButton botaoConcluir, botaoConsulta, botaoLimpar; 
+	private JButton botaoConcluir, botaoConsulta, botaoAlterar; 
+	private JMenuItem itemMenuEditar, itemMenuEditar2;
 	
 	
 	public CadastroAluno() {
@@ -43,7 +50,8 @@ public class CadastroAluno extends JFrame {
 	
 	public void iniciarComponentes() {
 		setTitle("Cadastro de Aluno");
-		setBounds(100, 100, 450, 350);
+		setBounds(100, 100, 450, 370);
+		setLocationRelativeTo(null);
 		
 		this.getContentPane().setLayout(null);
 		
@@ -140,24 +148,28 @@ public class CadastroAluno extends JFrame {
 		botaoConsulta = new JButton("Consulta");
 		botaoConsulta.setBounds(170, 280, 100, 20);
 		
-		botaoLimpar = new JButton("Limpar");
-		botaoLimpar.setBounds(290, 280, 100, 20);
-		
-		JMenuItem itemMenuArquivo = new JMenuItem("Sair");
-		JMenu menuArquivo = new JMenu("Arquivo");
-		menuArquivo.add(itemMenuArquivo);
-		
-		JMenuItem itemMenuEditar = new JMenuItem("Limpar");
-		JMenu menuEditar = new JMenu("Editar");
-		menuEditar.add(itemMenuEditar);
-		
-		JMenu menuAjuda = new JMenu("Ajuda");
+		botaoAlterar = new JButton("Alterar");
+		botaoAlterar.setBounds(290, 280, 100, 20);
 		
 		JMenuBar menuBarra = new JMenuBar();
+		
+		JMenu menuArquivo = new JMenu("Arquivo");
+		JMenuItem itemMenuArquivo = new JMenuItem("Sair");		
+		menuArquivo.add(itemMenuArquivo);
+		
+		JMenu menuEditar = new JMenu("Editar");
+		itemMenuEditar = new JMenuItem("Limpar");		
+		itemMenuEditar2 = new JMenuItem("Deletar");
+		menuEditar.add(itemMenuEditar);
+		menuEditar.add(itemMenuEditar2);
+		
+		JMenu menuAjuda = new JMenu("Ajuda");		
 		
 		menuBarra.add(menuArquivo);
 		menuBarra.add(menuEditar);
 		menuBarra.add(menuAjuda);
+		
+		setJMenuBar(menuBarra);
 		
 		this.getContentPane().add(information);
 		this.getContentPane().add(codigo);
@@ -180,15 +192,34 @@ public class CadastroAluno extends JFrame {
 		
 		this.getContentPane().add(botaoConcluir);
 		this.getContentPane().add(botaoConsulta);
-		this.getContentPane().add(botaoLimpar);
-		this.getContentPane().add(menuBarra);
+		this.getContentPane().add(botaoAlterar);
+		//this.getContentPane().add(menuBarra);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		
 	}	
+	public String ultimoResg(String email) throws SQLException
+	{ 
+			
+			Connection connection = new ConnectionFactory().getConnection();
+			
+			String sql = "SELECT * FROM `cadastroAluno` WHERE email =  '" + email + "'" ;
+			
+			
+			PreparedStatement stmt = connection.prepareStatement(sql);
+			ResultSet rs = stmt.executeQuery();
+			 
+			while(rs.next()){
+				return rs.getString("id");
+				}
+ 			return rs.getString("id");
+ 		 
+	}
 	public void definirEventos(){
+		//Tornando o campo código inativo
+		campoCodigo.setEnabled(false);
 		// Evento do Botão Limpar.
-				botaoLimpar.addActionListener(new ActionListener() {
+		itemMenuEditar.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 						// Limpa todos os Campos.
 						campoCodigo.setText("");
@@ -202,14 +233,10 @@ public class CadastroAluno extends JFrame {
 		});
 				botaoConcluir.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						//conexão com o banco
+						Connection connection = new ConnectionFactory().getConnection();
 						
-						if (campoCodigo.getText().equals("")) {
-							
-							JOptionPane.showMessageDialog(null,
-									"O Código não pode está vazio!");							
-							campoCodigo.requestFocus();
-		 
-						} else if (campoNome.getText().equals("")) {							
+						if (campoNome.getText().equals("")) {							
 							JOptionPane.showMessageDialog(null,
 									"O Nome não pode está vazio!");							
 							campoNome.requestFocus();
@@ -219,34 +246,40 @@ public class CadastroAluno extends JFrame {
 		 
 							campoEmail.requestFocus();
 		 
-						} else {
-						
-							try {									 
-								File arquivo = new File(campoCodigo.getText()
-										+ ".txt");
-								if(arquivo.exists()){
-									JOptionPane.showMessageDialog(null, "Arquivo já exisente!",
-											"Alerta", JOptionPane.ERROR_MESSAGE);
-									campoCodigo.requestFocus();
-								}else{
-									PrintWriter out = new PrintWriter(campoCodigo.getText()
-											+ ".txt");
-									out.println(campoCodigo.getText());
-									out.println(campoNome.getText());
-									out.println(campoEmail.getText());
-									out.println(listaDasCidades.getSelectedItem());
-									out.println(campoBairro.getText());
-									out.println(listaDosCursos.getSelectedItem());
-									if(yes.isSelected()) {
-										out.println(yes.getText());
+						} else if (listaDosCursos.getSelectedItem().equals("")) {
+							
+							JOptionPane.showMessageDialog(null, "Escolha o curso que deseja estudar!");
+							 
+							listaDosCursos.requestFocus();
+						}else {
+							String sql = "insert into cadastroAluno" +
+						             "(nome,email,cidade,bairro,curso,knew)" +
+						             " values (?,?,?,?,?,?)";						
+							try {
+								
+								 // prepared statement para inserção
+						         PreparedStatement stmt = connection.prepareStatement(sql);
+						         
+						         // seta os valores
+						         stmt.setString(1,campoNome.getText());
+						         stmt.setString(2,campoEmail.getText());
+						         stmt.setString(3,(String) listaDasCidades.getSelectedItem());
+						         stmt.setString(4,campoBairro.getText());
+						         stmt.setString(5,(String) listaDosCursos.getSelectedItem());
+						         if(yes.isSelected()) {
+										stmt.setString(6, yes.getText());
 									}if(no.isSelected()) {
-									out.println(no.getText());
-									}								
-									
-									out.close();		 
-									
-									JOptionPane.showMessageDialog(null,
-											"Arquivo Gravado com Sucesso!");
+										stmt.setString(6, no.getText());
+									}
+						         
+						         // executa
+						         stmt.execute();
+						         stmt.close();
+						         
+						         String a = ultimoResg(campoEmail.getText());
+						         
+						         JOptionPane.showMessageDialog(null,
+											"Arquivo Gravado com Sucesso!\nAluno(a) matriculado(a) com registro: "+a);
 									
 									campoCodigo.setText("");
 									campoNome.setText("");
@@ -254,10 +287,10 @@ public class CadastroAluno extends JFrame {
 									listaDasCidades.setSelectedItem(null);
 									campoBairro.setText("");
 									listaDosCursos.setSelectedItem(null);
-									grupo.clearSelection();
-								}
+									grupo.clearSelection();				         
+								
 			 
-								} catch (IOException Erro) {
+								} catch (SQLException Erro) {
 									JOptionPane.showMessageDialog(null,
 											"Erro ao Gravar no Arquivo" + Erro);
 								}									
@@ -266,34 +299,131 @@ public class CadastroAluno extends JFrame {
 				});
 				botaoConsulta.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
+						//conexão com o banco
+						Connection connection = new ConnectionFactory().getConnection();
 						
-						try {
+						String id = JOptionPane.showInputDialog(null,
+								"Infome o Código a abrir:");
+						
+						try {				 
+							PreparedStatement stmt = connection.prepareStatement("select * from cadastroAluno where id = '"+id+"'");
+					         ResultSet rs = stmt.executeQuery();
+												
+							 while (rs.next()) {
+					             // criando o objeto Contato
+					            int cod = rs.getInt("id");
+					            campoCodigo.setText(String.valueOf(cod));
+					            campoNome.setText(rs.getString("nome"));
+					            campoEmail.setText(rs.getString("email"));
+					            listaDasCidades.setSelectedItem(rs.getString("cidade"));
+					            campoBairro.setText(rs.getString("bairro"));
+					            listaDosCursos.setSelectedItem(rs.getString("curso"));
+					            String texto = rs.getString("knew");
+					            if(texto.equals(yes.getText())){
+									yes.setSelected(true);
+								}else if(texto.equals(no.getText())) {
+									no.setSelected(true);
+								}
+					            					            
+							 }
+							 stmt.execute();
+							 stmt.close();
+							 rs.close();
 							
-							String arquivo = JOptionPane.showInputDialog(null,
-									"Infome o Código a abrir:");
 		 
-							BufferedReader br = new BufferedReader(new FileReader(
-									arquivo + ".txt"));		 
-							
-							campoCodigo.setText(br.readLine());
-							campoNome.setText(br.readLine());
-							campoEmail.setText(br.readLine());
-							listaDasCidades.setSelectedItem(br.readLine());
-							campoBairro.setText(br.readLine());
-							listaDosCursos.setSelectedItem(br.readLine());
-							String texto = br.readLine(); 							
-							if(texto.equals(yes.getText())){
-								yes.setSelected(true);
-							}else if(texto.equals(no.getText())) {
-								no.setSelected(true);
-							}
-		 
-						} catch (IOException Erro) {
+						} catch (SQLException Erro) {
 		 
 						}
 					}
 				});
+				botaoAlterar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						//conexão com o banco
+						Connection connection = new ConnectionFactory().getConnection();
+						if (campoNome.getText().equals("")) {							
+							JOptionPane.showMessageDialog(null,
+									"O Nome não pode está vazio!");							
+							campoNome.requestFocus();
+		 
+						} else if (campoEmail.getText().equals("")) {							
+							JOptionPane.showMessageDialog(null, "O email não pode está vazio!");
+		 
+							campoEmail.requestFocus();
+		 
+						} else if (listaDosCursos.getSelectedItem().equals("")) {
+							
+							JOptionPane.showMessageDialog(null, "Escolha o curso que deseja estudar!");
+							 
+							listaDosCursos.requestFocus();
+						}else {
+						
+						String sql = "update cadastroAluno set nome=?, email=?,"+
+								"cidade=?, bairro=?, curso=?, knew=? where id=?";
+						
+						try {							 
+							PreparedStatement stmt = connection.prepareStatement(sql);
+							 stmt.setString(1,campoNome.getText());
+					         stmt.setString(2,campoEmail.getText());
+					         stmt.setString(3,(String) listaDasCidades.getSelectedItem());
+					         stmt.setString(4,campoBairro.getText());
+					         stmt.setString(5,(String) listaDosCursos.getSelectedItem());
+					         if(yes.isSelected()) {
+									stmt.setString(6, yes.getText());
+								}if(no.isSelected()) {
+									stmt.setString(6, no.getText());
+								}
+								stmt.setString(7,campoCodigo.getText());
+					         
+					         // executa
+					         stmt.execute();
+					         stmt.close();
+					         
+					         String a = ultimoResg(campoEmail.getText());
+					         
+					         JOptionPane.showMessageDialog(null,
+										"Alteração realizada com Sucesso!\nAluno(a) está matriculado(a) com registro: "+a);
+								
+								campoCodigo.setText("");
+								campoNome.setText("");
+								campoEmail.setText("");
+								listaDasCidades.setSelectedItem(null);
+								campoBairro.setText("");
+								listaDosCursos.setSelectedItem(null);
+								grupo.clearSelection();				         
+							
+		 
+							} catch (SQLException Erro) {
+								JOptionPane.showMessageDialog(null,
+										"Erro ao Alterar o registro" + Erro);
+							}
+						}
+					}
+					});
+							
+				itemMenuEditar2.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						//conexão com o banco
+						Connection connection = new ConnectionFactory().getConnection();
+						
+						String id = JOptionPane.showInputDialog(null,
+								"Infome o Código a abrir:");
+						try {
+							PreparedStatement stmt = connection.prepareStatement("delete from cadastroAluno where id = '"+id+"'");
+							campoCodigo.setText(String.valueOf(id));
+							  // executa
+					         stmt.execute();
+					         stmt.close();
+					         
+					         JOptionPane.showMessageDialog(null,
+										"Registro deletado com sucesso!!!");
+						}catch (SQLException Erro) {
+							JOptionPane.showMessageDialog(null,
+									"Erro ao deletar o registro" + Erro);
+						}
 	}
+				});
+				
+				}
 
 	public static void main(String[] args) {
 		CadastroAluno cadastro = new CadastroAluno();
