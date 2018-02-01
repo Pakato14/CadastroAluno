@@ -112,10 +112,10 @@ public class CadastroAluno extends JFrame {
 		campoBairro = new JTextField();
 		campoBairro.setBounds(100, 170, 170, 20);
 		
-		String [] listaCursos = {"C#", "Java", "PHP", "Python", "Ruby"};
+		String [] listaCursos = {" ","C#", "Java", "PHP", "Python", "Ruby"};
 		listaDosCursos = new JComboBox(listaCursos);
 		//listaDosCursos.setSelectedIndex(1);
-		listaDosCursos.setSelectedItem(null);
+		//listaDosCursos.setSelectedItem(null);
 		listaDosCursos.setBounds(100, 200, 80, 20);	
 		
 		yes = new JRadioButton("Sim");
@@ -203,8 +203,7 @@ public class CadastroAluno extends JFrame {
 			
 			Connection connection = new ConnectionFactory().getConnection();
 			
-			String sql = "SELECT * FROM `cadastroAluno` WHERE email =  '" + email + "'" ;
-			
+			String sql = "SELECT * FROM `cadastroAluno` WHERE email =  '" + email + "'" ;			
 			
 			PreparedStatement stmt = connection.prepareStatement(sql);
 			ResultSet rs = stmt.executeQuery();
@@ -246,7 +245,7 @@ public class CadastroAluno extends JFrame {
 		 
 							campoEmail.requestFocus();
 		 
-						} else if (listaDosCursos.getSelectedItem().equals("")) {
+						} else if (listaDosCursos.getSelectedIndex() == 0) {
 							
 							JOptionPane.showMessageDialog(null, "Escolha o curso que deseja estudar!");
 							 
